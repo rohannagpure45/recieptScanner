@@ -259,3 +259,6 @@ junit.xml
 # Misc
 *.tgz
 *.tar.gz
+
+# Generated schema exports
+docs/schemas/*.schema.json
