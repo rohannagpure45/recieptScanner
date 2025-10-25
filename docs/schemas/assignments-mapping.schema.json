@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://receipt-splitter.dev/schemas/assignments-mapping.schema.json",
+  "title": "AssignmentsMapping",
+  "type": "object",
+  "required": ["receipt_id", "assignments"],
+  "properties": {
+    "receipt_id": { "type": "string", "format": "uuid" },
+    "assignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["line_item_id", "splits"],
+        "properties": {
+          "line_item_id": { "type": "string", "format": "uuid" },
+          "splits": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "guest_id": { "type": "string", "format": "uuid" },
+                "share_basis_points": { "type": "integer", "minimum": 0, "maximum": 10000 },
+                "amount_cents": { "type": "integer", "minimum": 0 }
+              },
+              "required": ["guest_id"],
+              "oneOf": [
+                { "required": ["share_basis_points"] },
+                { "required": ["amount_cents"] }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

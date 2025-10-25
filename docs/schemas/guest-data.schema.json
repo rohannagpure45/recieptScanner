@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://receipt-splitter.dev/schemas/guest-data.schema.json",
+  "title": "GuestData",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": ["id", "name"],
+    "properties": {
+      "id": { "type": "string", "format": "uuid" },
+      "name": { "type": "string", "minLength": 1 },
+      "email": { "type": "string", "format": "email" },
+      "venmo_handle": { "type": "string" },
+      "paypal_link": { "type": "string", "format": "uri" }
+    }
+  }
+}
