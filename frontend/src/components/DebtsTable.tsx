@@ -1,6 +1,9 @@
 import type { ComputationOutput } from '@shared/schemas';
+import { useWizard } from '../context/WizardContext';
 
 export function DebtsTable({ data }: { data: ComputationOutput }) {
+  const { guests } = useWizard();
+  const nameFor = (id: string) => guests.find((g) => g.id === id)?.name || id;
   return (
     <div className="rounded-xl border border-slate-800">
       <table className="min-w-full text-sm text-slate-200">
@@ -13,7 +16,7 @@ export function DebtsTable({ data }: { data: ComputationOutput }) {
         <tbody>
           {data.perPerson.map((person: ComputationOutput['perPerson'][number]) => (
             <tr key={person.guestId} className="border-t border-slate-800">
-              <td className="px-4 py-2">{person.guestId}</td>
+              <td className="px-4 py-2">{nameFor(person.guestId)}</td>
               <td className="px-4 py-2">{person.owedToPayerCents}</td>
             </tr>
           ))}
