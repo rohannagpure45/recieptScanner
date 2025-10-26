@@ -6,15 +6,15 @@ const CLAUDE_MODEL = process.env.CLAUDE_MODEL ?? 'claude-3-haiku-20240307';
 
 type ClaudeJSON = ParsedReceipt | { error: string };
 
-async function callClaude(prompt: string): Promise<string> {
+async function callClaudeAPI(
+  messages: Array<{ role: 'user' | 'assistant' | 'system'; content: any }>,
+  system: string
+): Promise<string> {
   const apiKey = process.env.CLAUDE_API_KEY;
-  if (!apiKey) {
-    throw new Error('CLAUDE_API_KEY is not configured.');
-  }
+  if (!apiKey) throw new Error('CLAUDE_API_KEY is not configured.');
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30_000);
-
   try {
     const response = await fetch(CLAUDE_API_URL, {
       method: 'POST',
@@ -27,14 +27,8 @@ async function callClaude(prompt: string): Promise<string> {
         model: CLAUDE_MODEL,
         max_tokens: 2048,
         temperature: 0,
-        system:
-          'You are a meticulous receipts parsing assistant. Output only valid JSON that matches the requested schema. Do not include markdown fences or commentary.',
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ]
+        system,
+        messages
       }),
       signal: controller.signal
     });
@@ -48,20 +42,45 @@ async function callClaude(prompt: string): Promise<string> {
       error?: { message: string };
       content?: Array<{ type: string; text: string }>;
     };
-
-    if (json.error) {
-      throw new Error(`Claude API responded with error: ${json.error.message}`);
-    }
-
-    const firstText = json.content?.find((block) => block.type === 'text')?.text;
-    if (!firstText) {
-      throw new Error('Claude API response did not include text content.');
-    }
-
+    if (json.error) throw new Error(`Claude API responded with error: ${json.error.message}`);
+    const firstText = json.content?.find((b) => b.type === 'text')?.text;
+    if (!firstText) throw new Error('Claude API response did not include text content.');
     return firstText.trim();
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function callClaude(prompt: string): Promise<string> {
+  const system =
+    'You are a meticulous receipts parsing assistant. Output only valid JSON that matches the requested schema. Do not include markdown fences or commentary.';
+  return callClaudeAPI(
+    [
+      {
+        role: 'user',
+        content: prompt
+      }
+    ],
+    system
+  );
+}
+
+async function callClaudeVision(image: Buffer, mime: string, system: string): Promise<string> {
+  return callClaudeAPI(
+    [
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Extract strictly-formatted JSON matching the schema from this receipt image.' },
+          {
+            type: 'image',
+            source: { type: 'base64', media_type: mime, data: image.toString('base64') }
+          }
+        ]
+      }
+    ],
+    system
+  );
 }
 
 function buildPrompt(ocrText: string): string {
@@ -102,7 +121,7 @@ OCR TEXT END`;
 
 type ClaudeResponse = ParsedReceipt | { error: string };
 
-export async function parseReceiptWithClaude(ocrText: string): Promise<ClaudeResponse> {
+export async function parseReceiptWithClaude(imageBuffer: Buffer, mime: string): Promise<ClaudeResponse> {
   // Helper to generate a v4-like UUID for local/dev use
   const uuidv4 = () =>
     'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -140,10 +159,33 @@ export async function parseReceiptWithClaude(ocrText: string): Promise<ClaudeRes
     return mock;
   }
 
-  const prompt = buildPrompt(ocrText);
-
   try {
-    const rawText = await callClaude(prompt);
+    const schemaInstructions = `Return JSON strictly matching this TypeScript schema:
+{
+  "receiptId": string (UUID v4),
+  "merchant": string,
+  "transactionDate": string (ISO-8601 date),
+  "currency": string (three-letter ISO code),
+  "category"?: string,
+  "notes"?: string,
+  "lineItems": Array<{
+    "id": string (UUID v4),
+    "name": string,
+    "quantity": integer >= 1,
+    "unitPriceCents": integer >= 0,
+    "totalCents": integer >= 0,
+    "category"?: string,
+    "notes"?: string
+  }> (at least one item),
+  "subtotalCents": integer >= 0,
+  "taxCents": integer >= 0,
+  "tipCents": integer >= 0,
+  "totalCents": integer >= 0
+}`;
+
+    const system = `You are a meticulous receipts parsing assistant. Output only valid JSON that matches the requested schema. Do not include markdown fences or commentary.\n${schemaInstructions}\nRules:\n- All amounts are integers in cents.\n- Ensure subtotal + tax + tip = total when possible.\n- Never add hallucinated items.`;
+
+    const rawText = await callClaudeVision(imageBuffer, mime, system);
     const sanitized = rawText.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(sanitized) as ClaudeJSON;
 

@@ -1,4 +1,4 @@
-import { preprocessImage, runVisionOCR, runTesseractOCR } from '../ocr';
+import { preprocessImage } from '../ocr';
 import { parseReceiptWithClaude } from '../llm/claudeClient';
 import { validateParsedReceipt } from '../../utils/validation';
 import type { ParsedReceipt } from '@shared/schemas';
@@ -7,6 +7,7 @@ export type TipMode = 'fixed' | 'percent';
 
 export type PipelineInput = {
   fileBuffer: Buffer;
+  fileMime: string;
   fileKey: string;
   guests: unknown;
   payerId?: string;
@@ -16,9 +17,7 @@ export type PipelineInput = {
 
 export async function runReceiptPipeline(input: PipelineInput): Promise<{ receipt: ParsedReceipt }> {
   const processed = await preprocessImage(input.fileBuffer);
-  const primary = await runVisionOCR(processed);
-  const ocrText = primary.text.length ? primary.text : (await runTesseractOCR(processed)).text;
-  const parsed = await parseReceiptWithClaude(ocrText);
+  const parsed = await parseReceiptWithClaude(processed, input.fileMime);
   if ('error' in parsed && parsed.error) {
     throw new Error(parsed.error);
   }

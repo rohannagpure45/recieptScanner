@@ -15,6 +15,8 @@ export const ParsedReceiptSchema = z.object({
   merchant: z.string().min(1),
   transactionDate: z.string(),
   currency: z.string().length(3).default('USD'),
+  category: z.string().optional(),
+  notes: z.string().optional(),
   lineItems: z.array(LineItemSchema).min(1),
   subtotalCents: z.number().int().min(0),
   taxCents: z.number().int().min(0),

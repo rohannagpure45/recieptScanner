@@ -39,14 +39,13 @@ This document describes the current MVP implementation, how each feature works, 
 - Entry: `POST /api/receipts` (multer memory storage)
 - Steps:
   1) Preprocess image (placeholder – rotation/contrast planned)
-  2) OCR: Google Vision primary (gated by `GOOGLE_CREDENTIALS_JSON`), Tesseract fallback
-  3) LLM parse: Claude client
-     - If `CLAUDE_API_KEY` is absent, returns a valid mock `ParsedReceipt` for local dev.
-  4) Validation: checks `subtotal + tax + tip ≈ total` within 50 cents; throws otherwise.
+  2) Vision LLM parse (primary): Claude Messages API with image content blocks (vision‑first)
+     - If `CLAUDE_API_KEY` is absent in dev, returns a valid mock `ParsedReceipt`.
+  3) Validation: checks `subtotal + tax + tip ≈ total` within 50 cents; throws otherwise.
 - Known quirks:
-  - Preprocess and OCR are stubs; Vision/Tesseract not integrated yet.
-  - LLM is mocked in dev; production requires real Claude calls with deterministic settings.
-  - Validation failures surface as 500s today; UI shows the error text.
+  - Vision is primary; no OCR fallback is wired right now.
+  - Provide appropriately sized images (downscaling planned for cost/latency control).
+  - Validation failures surface as 500s; UI shows the error text.
 
 ## Match (Step 2)
 - Components: `ParsedItemsTable`, `AssignmentsList` → `AssignItem`, `PayerSelector`.

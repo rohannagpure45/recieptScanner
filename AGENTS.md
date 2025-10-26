@@ -9,8 +9,9 @@
 
 ## Build, Test, and Development Commands
 - `npm install` (repo root) bootstraps all workspaces via npm workspaces.
-- `npm run dev --workspace frontend` launches Vite with Tailwind watch mode.
-- `npm run dev --workspace backend` starts the API with hot reload (ts-node-dev or nodemon).
+- `npm run dev` starts both frontend and backend in parallel (Turbo).
+- `npm run dev:frontend` launches Vite with Tailwind watch mode.
+- `npm run dev:backend` starts the API with hot reload (`ts-node-dev`, CommonJS).
 - `npm run build --workspaces` produces production bundles for every package.
 - `npm run test --workspaces` executes Vitest (frontend/shared) and Jest (backend); add `--runInBand` if debugging the pipeline.
 
@@ -33,3 +34,21 @@
 ## Security & Configuration Tips
 - Never commit API keys; use `.env.example` as the contract and load secrets via Doppler or AWS SSM.
 - Restrict receipt uploads to image/PDF MIME types and scan outputs before persisting to S3-compatible storage.
+ - Local dev loads `.env` (repo root or backend/) for convenience; production should use a proper secret manager.
+
+## Current Feature Notes
+- Frontend wizard: Upload → Match → Review.
+  - Upload uses a 10s aborting fetch and validates server JSON payloads before state updates.
+  - Match assigns items to guests; equal split with deterministic remainder distribution; shows unequal splits clearly.
+  - Review computes per-person totals; CSV/JSON export wired; email send posts to `/api/receipts/email`.
+- Backend API:
+  - Routes: `POST /api/receipts`, `POST /api/receipts/email`, `GET /health`.
+  - Claude integration is vision‑first (send image to Messages API); strict JSON with Zod validation.
+  - No OCR fallback is wired right now; keep images reasonable in size.
+- Shared money helpers hardened:
+  - `toCents`/`fromCents` validate inputs; `allocateRemainder` is non‑mutating with clamping and validation.
+
+## Dev Tips
+- If port 4000/5173 are busy, Vite auto-bumps; backend requires freeing 4000 or setting `PORT`.
+- Kill watchers: `pkill -f ts-node-dev` or `pkill -f vite`.
+- Logs: `backend-dev.log`, `frontend-dev.log`, `dev-all.log`.

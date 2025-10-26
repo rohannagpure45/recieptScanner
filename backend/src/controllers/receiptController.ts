@@ -12,6 +12,19 @@ export async function createReceiptJob(
     return res.status(400).json({ error: 'Missing receipt upload.' });
   }
 
+  // Enforce explicit, safe MIME handling for vision-first pipeline
+  const mime = req.file.mimetype?.toLowerCase();
+  if (!mime) {
+    console.warn('createReceiptJob: uploaded file missing mimetype');
+    return res.status(400).json({ error: 'Missing file mimetype.' });
+  }
+  const allowed = new Set(['image/jpeg', 'image/jpg', 'image/png']);
+  if (!allowed.has(mime)) {
+    return res
+      .status(400)
+      .json({ error: `Unsupported file type: ${mime}. Allowed: image/jpeg, image/png.` });
+  }
+
   const guests = JSON.parse(req.body.guests ?? '[]');
   const payerId = req.body.payerId;
   const tipMode = req.body.tipMode ?? 'fixed';
@@ -20,6 +33,7 @@ export async function createReceiptJob(
   const fileKey = await persistUpload(req.file);
   const result = await runReceiptPipeline({
     fileBuffer: req.file.buffer,
+    fileMime: mime,
     fileKey,
     guests,
     payerId,
