@@ -28,7 +28,7 @@ export default function ReviewPage() {
         <button className="btn-secondary" onClick={() => setStep(1)}>
           Back
         </button>
-        <button className="btn-primary">Finish</button>
+        <button className="btn-primary" onClick={() => setStep(0)}>Finish</button>
       </div>
     </section>
   );

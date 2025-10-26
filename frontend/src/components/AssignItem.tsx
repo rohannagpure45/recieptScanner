@@ -10,15 +10,28 @@ export function AssignItem({ lineItemId, lineItemName, lineItemTotalCents }: Ass
   const { guests, assignments, setAssignments } = useWizard();
 
   const selected = new Set(assignments[lineItemId] ?? []);
+  const selectedIds = Array.from(selected);
 
   const toggle = (guestId: string) => {
-    const next = new Set(assignments[lineItemId] ?? []);
-    if (next.has(guestId)) next.delete(guestId);
-    else next.add(guestId);
-    setAssignments({ ...assignments, [lineItemId]: Array.from(next) });
+    setAssignments((prev) => {
+      const next = new Set(prev[lineItemId] ?? []);
+      if (next.has(guestId)) next.delete(guestId);
+      else next.add(guestId);
+      return { ...prev, [lineItemId]: Array.from(next) };
+    });
   };
 
-  const perPerson = selected.size > 0 ? Math.floor(lineItemTotalCents / selected.size) : 0;
+  const splitSharesCents = selectedIds.length
+    ? (() => {
+        const base = Math.floor(lineItemTotalCents / selectedIds.length);
+        const remainder = lineItemTotalCents % selectedIds.length;
+        return selectedIds.map((_, index) => base + (index < remainder ? 1 : 0));
+      })()
+    : [];
+
+  const splitSummary = splitSharesCents
+    .map((amount) => (amount / 100).toFixed(2))
+    .join(', ');
 
   return (
     <div className="rounded-lg border border-slate-800 p-3">
@@ -40,9 +53,10 @@ export function AssignItem({ lineItemId, lineItemName, lineItemTotalCents }: Ass
         ))}
       </div>
       <p className="mt-2 text-xs text-slate-500">
-        {selected.size > 0 ? `Split equally among ${selected.size} — ~${(perPerson / 100).toFixed(2)} each` : 'Select one or more people'}
+        {selectedIds.length > 0
+          ? `Split equally among ${selectedIds.length} — ${splitSummary} each`
+          : 'Select one or more people'}
       </p>
     </div>
   );
 }
-

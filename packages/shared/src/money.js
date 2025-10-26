@@ -1,9 +1,22 @@
 export function toCents(amount) {
-    const value = typeof amount === 'string' ? Number(amount) : amount;
+    let value;
+    if (typeof amount === 'string') {
+        value = Number(amount.trim());
+    }
+    else {
+        value = Number(amount);
+    }
+    if (!Number.isFinite(value)) {
+        throw new TypeError(`toCents expects a finite numeric amount, got ${String(amount)}`);
+    }
     return Math.round(value * 100);
 }
 export function fromCents(cents) {
-    return (cents / 100).toFixed(2);
+    const value = Number(cents);
+    if (!Number.isFinite(value)) {
+        throw new TypeError(`fromCents expects a finite number of cents, got ${cents}`);
+    }
+    return (value / 100).toFixed(2);
 }
 export function allocateRemainder(buckets, targetTotal) {
     const currentTotal = buckets.reduce((sum, value) => sum + value, 0);
