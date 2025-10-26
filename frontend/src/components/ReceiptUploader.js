@@ -85,8 +85,8 @@ export function ReceiptUploader() {
                 if (ctx) {
                     ctx.drawImage(img, 0, 0, estW, estH);
                     const lower = (file.name || '').toLowerCase();
-                    const mime = (file.type || '').toLowerCase();
-                    const isPng = /png/i.test(mime) || (!mime && lower.endsWith('.png'));
+                    const mimeGuess = (file.type || '').toLowerCase();
+                    const isPng = /png/i.test(mimeGuess) || (!mimeGuess && lower.endsWith('.png'));
                     const targetMime = isPng ? 'image/png' : 'image/jpeg';
                     const blob = await new Promise((resolve) => canvas.toBlob(resolve, targetMime, isPng ? undefined : 0.75));
                     if (blob) {
