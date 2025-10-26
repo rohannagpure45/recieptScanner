@@ -6,7 +6,10 @@ import { useWizard } from '../context/WizardContext';
 import { computeSplit } from '../lib/compute';
 export default function MatchPage() {
     const { setStep, guests, parsedData, payerId, assignments, taxMode, setTaxMode, tipMode, setTipMode, tipPercent, setTipPercent, setComputation } = useWizard();
-    const allAssigned = Boolean(parsedData?.lineItems.every((li) => (assignments[li.id] ?? []).length > 0));
+    const allAssigned = Boolean(parsedData &&
+        Array.isArray(parsedData.lineItems) &&
+        parsedData.lineItems.length > 0 &&
+        parsedData.lineItems.every((li) => (assignments[li.id] ?? []).length > 0));
     const canContinue = Boolean(parsedData && payerId && guests.length > 0 && allAssigned);
     const onContinue = () => {
         if (!parsedData || !payerId)

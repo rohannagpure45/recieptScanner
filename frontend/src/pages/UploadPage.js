@@ -37,8 +37,6 @@ export default function UploadPage() {
             setParsedData(receipt);
             setAssignments({});
             setStep(1);
-            if (timeoutId)
-                clearTimeout(timeoutId);
         }
         catch (e) {
             if (e?.name === 'AbortError') {

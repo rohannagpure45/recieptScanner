@@ -21,7 +21,10 @@ export default function MatchPage() {
   } = useWizard();
 
   const allAssigned = Boolean(
-    parsedData?.lineItems.every((li: { id: string }) => (assignments[li.id] ?? []).length > 0)
+    parsedData &&
+      Array.isArray(parsedData.lineItems) &&
+      parsedData.lineItems.length > 0 &&
+      parsedData.lineItems.every((li: { id: string }) => (assignments[li.id] ?? []).length > 0)
   );
   const canContinue = Boolean(parsedData && payerId && guests.length > 0 && allAssigned);
 

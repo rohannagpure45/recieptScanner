@@ -13,18 +13,37 @@ export function computeSplit(params) {
         const assignees = assignments[li.id] ?? [];
         if (assignees.length === 0)
             continue; // unassigned; ignored in MVP
-        const base = Math.floor(li.totalCents / assignees.length);
-        let buckets = assignees.map(() => base);
+        const validIds = assignees.filter((gid) => personIdx.has(gid));
+        const missingIds = assignees.filter((gid) => !personIdx.has(gid));
+        if (missingIds.length > 0) {
+            // Defensive: warn and proceed with valid assignees only.
+            // This should not occur via UI, but protects against inconsistent state.
+            console.warn(`computeSplit: skipping unknown assignees for lineItem ${li.id}: ${missingIds.join(', ')}`);
+        }
+        if (validIds.length === 0) {
+            // Nothing valid to assign; treat as unassigned
+            continue;
+        }
+        const base = Math.floor(li.totalCents / validIds.length);
+        let buckets = validIds.map(() => base);
         buckets = allocateRemainder(buckets, li.totalCents);
-        assignees.forEach((gid, idx) => {
+        validIds.forEach((gid, idx) => {
             const i = personIdx.get(gid);
-            if (i === undefined)
-                return;
+            if (i === undefined) {
+                throw new Error(`computeSplit invariant: missing guest index for gid='${gid}' on lineItem '${li.id}'`);
+            }
             itemsTotal[i] += buckets[idx];
             itemsByPerson[i].push({ lineItemId: li.id, shareCents: buckets[idx] });
         });
     }
-    const subtotalUsed = itemsTotal.reduce((a, b) => a + b, 0) || 1; // avoid div-by-zero
+    // Sum of assigned item totals across all guests. If this is zero, it means
+    // no items were assigned to anyone. We treat this as a hard error instead of
+    // silently dividing by 1 (which would mask real issues) because proportional
+    // tax/tip splits are undefined without any assigned items.
+    const subtotalUsed = itemsTotal.reduce((a, b) => a + b, 0);
+    if (subtotalUsed === 0) {
+        throw new Error('All items unassigned: assign at least one item before computing splits.');
+    }
     // Tax allocation
     let taxBuckets;
     if (taxMode === 'even') {

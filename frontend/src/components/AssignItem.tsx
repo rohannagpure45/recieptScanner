@@ -32,6 +32,8 @@ export function AssignItem({ lineItemId, lineItemName, lineItemTotalCents }: Ass
   const splitSummary = splitSharesCents
     .map((amount) => (amount / 100).toFixed(2))
     .join(', ');
+  const allEqual =
+    splitSharesCents.length > 0 && splitSharesCents.every((v) => v === splitSharesCents[0]);
 
   return (
     <div className="rounded-lg border border-slate-800 p-3">
@@ -54,7 +56,9 @@ export function AssignItem({ lineItemId, lineItemName, lineItemTotalCents }: Ass
       </div>
       <p className="mt-2 text-xs text-slate-500">
         {selectedIds.length > 0
-          ? `Split equally among ${selectedIds.length} — ${splitSummary} each`
+          ? allEqual
+            ? `Split equally among ${selectedIds.length} — ${splitSummary} each`
+            : `Split among ${selectedIds.length} — ${splitSummary} (unequal)`
           : 'Select one or more people'}
       </p>
     </div>

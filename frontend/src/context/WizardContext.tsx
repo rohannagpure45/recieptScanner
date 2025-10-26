@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import type { ReceiptParsedData, ComputationOutput } from '@shared/schemas';
 import type { TaxMode, TipMode } from '../lib/compute';
 
@@ -20,7 +21,7 @@ type WizardContextValue = {
   payerId?: string;
   setPayerId: (id?: string) => void;
   assignments: Record<string, string[]>;
-  setAssignments: (m: Record<string, string[]>) => void;
+  setAssignments: Dispatch<SetStateAction<Record<string, string[]>>>;
   taxMode: TaxMode;
   setTaxMode: (m: TaxMode) => void;
   tipMode: TipMode;
