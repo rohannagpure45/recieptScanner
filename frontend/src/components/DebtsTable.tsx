@@ -11,7 +11,7 @@ export function DebtsTable({ data }: { data: ComputationOutput }) {
           </tr>
         </thead>
         <tbody>
-          {data.perPerson.map((person) => (
+          {data.perPerson.map((person: ComputationOutput['perPerson'][number]) => (
             <tr key={person.guestId} className="border-t border-slate-800">
               <td className="px-4 py-2">{person.guestId}</td>
               <td className="px-4 py-2">{person.owedToPayerCents}</td>

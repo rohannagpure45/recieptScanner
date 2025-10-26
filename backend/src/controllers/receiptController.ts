@@ -2,7 +2,10 @@ import type { Request, Response } from 'express';
 import { runReceiptPipeline } from '../services/pipeline/receiptPipeline';
 import { persistUpload } from '../services/storage/storageService';
 
-export async function createReceiptJob(req: Request, res: Response) {
+export async function createReceiptJob(
+  req: Request & { file?: Express.Multer.File },
+  res: Response
+) {
   if (!req.file) {
     return res.status(400).json({ error: 'Missing receipt upload.' });
   }

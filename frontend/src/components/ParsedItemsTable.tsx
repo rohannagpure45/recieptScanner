@@ -1,4 +1,5 @@
 import { useWizard } from '../context/WizardContext';
+import type { ParsedReceipt } from '@shared/schemas';
 
 export function ParsedItemsTable() {
   const { parsedData } = useWizard();
@@ -19,7 +20,7 @@ export function ParsedItemsTable() {
           </tr>
         </thead>
         <tbody>
-          {parsedData.lineItems.map((item) => (
+          {parsedData.lineItems.map((item: ParsedReceipt['lineItems'][number]) => (
             <tr key={item.id} className="border-t border-slate-800">
               <td className="px-4 py-2">
                 <input className="input w-full" value={item.name} readOnly />

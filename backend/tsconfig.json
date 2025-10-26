@@ -2,10 +2,13 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
     "types": ["node"],
     "resolveJsonModule": true,
-    "module": "CommonJS"
+    "module": "CommonJS",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../packages/shared/src/*"]
+    }
   },
   "include": ["src"],
   "references": []
