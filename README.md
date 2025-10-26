@@ -77,7 +77,7 @@ npm run format --workspaces
 ## Notes
 
 - In dev without CLAUDE_API_KEY, backend returns a mock receipt.
-- Vision‑first pipeline: no OCR fallback is wired at the moment.
+- Vision‑first pipeline: no OCR fallback is wired at the moment. Images are downscaled (~1600px width), auto-rotated, and HEIC is converted to JPEG before parsing.
 - All money math uses integers in cents; see `packages/shared/src/money.*`.
 
 ## License

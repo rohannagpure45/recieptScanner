@@ -15,6 +15,12 @@ This document describes the current MVP implementation, how each feature works, 
   - Accepted MIME types (client-side): `image/png`, `image/jpeg`, `application/pdf`.
   - Max upload size (server-side, in-memory): 8 MB (multer limit).
 
+### Client-side Checks & Previews
+- File input accepts common image types (JPG/PNG/HEIC/HEIF).
+- Max file size check: 8MB hard limit; warns above 4MB.
+- Inline warnings for large files; no modal alerts.
+- Thumbnail preview is shown (downscaled in the browser for display).
+
 ### Network Timeout
 - The POST to `/api/receipts` uses an `AbortController` with a 10s timeout.
 - Implementation details:
@@ -38,7 +44,7 @@ This document describes the current MVP implementation, how each feature works, 
 ## Parsing Pipeline (Backend)
 - Entry: `POST /api/receipts` (multer memory storage)
 - Steps:
-  1) Preprocess image (placeholder – rotation/contrast planned)
+  1) Preprocess image (downscale to ~1600px width, auto-rotate via EXIF, HEIC→JPEG conversion, JPEG quality ~75)
   2) Vision LLM parse (primary): Claude Messages API with image content blocks (vision‑first)
      - If `CLAUDE_API_KEY` is absent in dev, returns a valid mock `ParsedReceipt`.
   3) Validation: checks `subtotal + tax + tip ≈ total` within 50 cents; throws otherwise.

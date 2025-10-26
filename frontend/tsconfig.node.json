@@ -3,7 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "types": ["node"],
-    "outDir": "dist"
+    "outDir": "dist",
+    "moduleResolution": "bundler"
   },
   "include": ["vite.config.ts"]
 }

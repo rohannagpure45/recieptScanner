@@ -18,7 +18,7 @@ export async function createReceiptJob(
     console.warn('createReceiptJob: uploaded file missing mimetype');
     return res.status(400).json({ error: 'Missing file mimetype.' });
   }
-  const allowed = new Set(['image/jpeg', 'image/jpg', 'image/png']);
+  const allowed = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif']);
   if (!allowed.has(mime)) {
     return res
       .status(400)

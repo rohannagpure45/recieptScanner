@@ -16,8 +16,8 @@ export type PipelineInput = {
 };
 
 export async function runReceiptPipeline(input: PipelineInput): Promise<{ receipt: ParsedReceipt }> {
-  const processed = await preprocessImage(input.fileBuffer);
-  const parsed = await parseReceiptWithClaude(processed, input.fileMime);
+  const processed = await preprocessImage(input.fileBuffer, input.fileMime);
+  const parsed = await parseReceiptWithClaude(processed.buffer, processed.mime);
   if ('error' in parsed && parsed.error) {
     throw new Error(parsed.error);
   }

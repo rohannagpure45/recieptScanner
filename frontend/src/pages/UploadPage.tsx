@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReceiptParsedData } from '@shared/schemas';
 import { ReceiptUploader } from '../components/ReceiptUploader';
 import { GuestsList } from '../components/GuestsList';
@@ -9,9 +9,12 @@ export default function UploadPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const canContinue = !submitting && Boolean(receiptFile) && guests.some((guest) => guest.name.trim().length > 0);
+  const inFlightRef = useRef(false);
 
   const handleNext = async () => {
+    if (inFlightRef.current) return; // guard against rapid double clicks
     if (!receiptFile) return;
+    inFlightRef.current = true;
     setSubmitting(true);
     setError(undefined);
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -48,6 +51,7 @@ export default function UploadPage() {
     } finally {
       if (timeoutId) clearTimeout(timeoutId);
       setSubmitting(false);
+      inFlightRef.current = false;
     }
   };
 
@@ -61,7 +65,7 @@ export default function UploadPage() {
       <GuestsList />
       {error && <p className="text-sm text-red-400">{error}</p>}
       <div className="flex justify-end">
-        <button className="btn-primary" disabled={!canContinue} onClick={handleNext}>
+        <button className="btn-primary" disabled={!canContinue} onClick={handleNext} aria-busy={submitting}>
           {submitting ? 'Uploading…' : 'Next'}
         </button>
       </div>
