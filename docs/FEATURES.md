@@ -83,7 +83,8 @@ This document describes the current MVP implementation, how each feature works, 
 - Data source: `computation` produced on Match `Continue`.
 - Quirks:
   - Changing tax/tip settings requires recomputing on the Match screen (current UX).
-  - Export buttons are placeholders; email sending is not wired.
+  - Export: `Download CSV` exports per-person summary (items/tax/tip/total/owed). `Download JSON` exports the raw computation JSON.
+  - Email: `Send Emails` posts to `/api/receipts/email`. With no `SENDGRID_API_KEY`, backend logs a dry-run; otherwise it will queue via SendGrid (integration TBD).
 
 ## Backend API
 - `GET /` → plain text “Receipt Scanner API is running”
@@ -134,4 +135,3 @@ This document describes the current MVP implementation, how each feature works, 
 - Backend dev: `npm run dev --workspace backend` (Express on `:4000`, CommonJS via `ts-node-dev`).
 - Builds: `npm run build --workspaces`.
 - Logs: `frontend-dev.log`, `backend-dev.log`. Stop with `pkill -f vite` / `pkill -f ts-node-dev`.
-
