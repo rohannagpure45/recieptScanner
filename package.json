@@ -8,8 +8,10 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "npm run dev:all",
     "dev:frontend": "npm run dev --workspace frontend",
     "dev:backend": "npm run dev --workspace backend",
+    "dev:all": "turbo run dev --parallel --filter=frontend --filter=backend",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
