@@ -12,6 +12,7 @@ function formatMB(bytes: number) {
 export function ReceiptUploader() {
   const { receiptFile, setReceiptFile } = useWizard();
   const inputRef = useRef<HTMLInputElement>(null);
+  const currentFileIdRef = useRef(0);
   const [previewUrl, setPreviewUrl] = useState<string>();
   const [warning, setWarning] = useState<string>();
   const [error, setError] = useState<string>();
@@ -23,6 +24,7 @@ export function ReceiptUploader() {
 
   const handleFile = (file?: File) => {
     if (!file) return;
+    const fileId = ++currentFileIdRef.current;
     setError(undefined);
     setWarning(undefined);
     setOrigDims(undefined);
@@ -31,7 +33,15 @@ export function ReceiptUploader() {
     setEstMime(undefined);
     setPreviewSupported(true);
 
-    if (!ACCEPTED.includes(file.type.toLowerCase())) {
+    const mime = (file.type || '').toLowerCase();
+    let ok = !!mime && ACCEPTED.includes(mime);
+    if (!ok) {
+      const lower = (file.name || '').toLowerCase();
+      if (!mime && (lower.endsWith('.heic') || lower.endsWith('.heif'))) {
+        ok = true;
+      }
+    }
+    if (!ok) {
       setError('Unsupported file type. Please upload PNG, JPG, or HEIC/HEIF.');
       return;
     }
@@ -47,12 +57,20 @@ export function ReceiptUploader() {
     }
 
     setReceiptFile(file);
+    // Revoke any previous preview URL before setting a new one
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
     // Attempt to read intrinsic dimensions and estimate downscaled size
     // Note: HEIC/HEIF may not preview in some browsers; estimation will be skipped.
     const img = new Image();
     img.onload = async () => {
+      if (fileId !== currentFileIdRef.current) {
+        // Stale callback from a previous file selection
+        return;
+      }
       const w = img.naturalWidth || img.width;
       const h = img.naturalHeight || img.height;
       setOrigDims({ w, h });
@@ -75,10 +93,12 @@ export function ReceiptUploader() {
         const ctx = canvas.getContext('2d');
         if (ctx) {
           ctx.drawImage(img, 0, 0, estW, estH);
-          const targetIsPng = /png/i.test(file.type);
-          const targetMime = targetIsPng ? 'image/png' : 'image/jpeg';
+          const lower = (file.name || '').toLowerCase();
+          const mimeGuess = (file.type || '').toLowerCase();
+          const isPng = /png/i.test(mimeGuess) || (!mimeGuess && lower.endsWith('.png'));
+          const targetMime = isPng ? 'image/png' : 'image/jpeg';
           const blob: Blob | null = await new Promise((resolve) =>
-            canvas.toBlob(resolve, targetMime, targetIsPng ? undefined : 0.75)
+            canvas.toBlob(resolve, targetMime, isPng ? undefined : 0.75)
           );
           if (blob) {
             setEstBytes(blob.size);
@@ -90,16 +110,18 @@ export function ReceiptUploader() {
       }
     };
     img.onerror = () => {
+      if (fileId !== currentFileIdRef.current) return;
       setPreviewSupported(false);
     };
     img.src = url;
   };
 
   useEffect(() => {
+    // Revoke preview URL on unmount
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
-  }, [previewUrl]);
+  }, []);
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6">

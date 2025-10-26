@@ -10,6 +10,7 @@ function formatMB(bytes) {
 export function ReceiptUploader() {
     const { receiptFile, setReceiptFile } = useWizard();
     const inputRef = useRef(null);
+    const currentFileIdRef = useRef(0);
     const [previewUrl, setPreviewUrl] = useState();
     const [warning, setWarning] = useState();
     const [error, setError] = useState();
@@ -21,6 +22,7 @@ export function ReceiptUploader() {
     const handleFile = (file) => {
         if (!file)
             return;
+        const fileId = ++currentFileIdRef.current;
         setError(undefined);
         setWarning(undefined);
         setOrigDims(undefined);
@@ -28,7 +30,15 @@ export function ReceiptUploader() {
         setEstBytes(undefined);
         setEstMime(undefined);
         setPreviewSupported(true);
-        if (!ACCEPTED.includes(file.type.toLowerCase())) {
+        const mime = (file.type || '').toLowerCase();
+        let ok = !!mime && ACCEPTED.includes(mime);
+        if (!ok) {
+            const lower = (file.name || '').toLowerCase();
+            if (!mime && (lower.endsWith('.heic') || lower.endsWith('.heif'))) {
+                ok = true;
+            }
+        }
+        if (!ok) {
             setError('Unsupported file type. Please upload PNG, JPG, or HEIC/HEIF.');
             return;
         }
@@ -40,12 +50,20 @@ export function ReceiptUploader() {
             setWarning(`Large image detected (${formatMB(file.size)}). We will downscale and compress before parsing to reduce cost and time.`);
         }
         setReceiptFile(file);
+        // Revoke any previous preview URL before setting a new one
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
         const url = URL.createObjectURL(file);
         setPreviewUrl(url);
         // Attempt to read intrinsic dimensions and estimate downscaled size
         // Note: HEIC/HEIF may not preview in some browsers; estimation will be skipped.
         const img = new Image();
         img.onload = async () => {
+            if (fileId !== currentFileIdRef.current) {
+                // Stale callback from a previous file selection
+                return;
+            }
             const w = img.naturalWidth || img.width;
             const h = img.naturalHeight || img.height;
             setOrigDims({ w, h });
@@ -66,9 +84,11 @@ export function ReceiptUploader() {
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
                     ctx.drawImage(img, 0, 0, estW, estH);
-                    const targetIsPng = /png/i.test(file.type);
-                    const targetMime = targetIsPng ? 'image/png' : 'image/jpeg';
-                    const blob = await new Promise((resolve) => canvas.toBlob(resolve, targetMime, targetIsPng ? undefined : 0.75));
+                    const lower = (file.name || '').toLowerCase();
+                    const mime = (file.type || '').toLowerCase();
+                    const isPng = /png/i.test(mime) || (!mime && lower.endsWith('.png'));
+                    const targetMime = isPng ? 'image/png' : 'image/jpeg';
+                    const blob = await new Promise((resolve) => canvas.toBlob(resolve, targetMime, isPng ? undefined : 0.75));
                     if (blob) {
                         setEstBytes(blob.size);
                         setEstMime(targetMime);
@@ -80,15 +100,18 @@ export function ReceiptUploader() {
             }
         };
         img.onerror = () => {
+            if (fileId !== currentFileIdRef.current)
+                return;
             setPreviewSupported(false);
         };
         img.src = url;
     };
     useEffect(() => {
+        // Revoke preview URL on unmount
         return () => {
             if (previewUrl)
                 URL.revokeObjectURL(previewUrl);
         };
-    }, [previewUrl]);
+    }, []);
     return (_jsxs("div", { className: "rounded-xl border border-slate-800 bg-slate-900/40 p-6", children: [_jsx("p", { className: "text-sm text-slate-300", children: "Upload a clear photo of the receipt." }), _jsx("input", { ref: inputRef, className: "mt-3 block w-full text-sm", type: "file", accept: "image/*", onChange: (event) => handleFile(event.target.files?.[0]) }), (error || warning) && (_jsxs("div", { className: "mt-3 space-y-1", children: [error && _jsx("p", { className: "text-sm text-red-400", children: error }), !error && warning && _jsx("p", { className: "text-sm text-yellow-400", children: warning })] })), receiptFile && (_jsxs("div", { className: "mt-4 text-sm text-slate-200", children: [_jsxs("div", { className: "flex items-center justify-between", children: [_jsxs("p", { children: ["Selected: ", receiptFile.name, ' ', _jsxs("span", { className: "text-slate-400", children: ["(", formatMB(receiptFile.size), ")"] })] }), _jsx("button", { className: "text-brand", onClick: () => inputRef.current?.click(), children: "Replace file" })] }), _jsxs("div", { className: "mt-2 grid gap-1 text-xs text-slate-400", children: [origDims && (_jsxs("p", { children: ["Original: ", origDims.w, "\u00D7", origDims.h, " \u2022 ", formatMB(receiptFile.size)] })), estDims && (_jsxs("p", { children: ["Estimated upload: ", estDims.w, "\u00D7", estDims.h, typeof estBytes === 'number' && (_jsxs(_Fragment, { children: [' ', "\u2022 ~", formatMB(estBytes), " (", estMime, ")"] }))] }))] }), previewUrl && (_jsxs("div", { className: "mt-3", children: [previewSupported ? (_jsx("img", { src: previewUrl, alt: "Receipt preview", className: "max-h-48 w-auto rounded-md border border-slate-800 object-contain" })) : (_jsx("p", { className: "text-xs text-yellow-400", children: "Preview not supported for this image format in your browser. The server will still process it." })), _jsx("p", { className: "mt-1 text-xs text-slate-400", children: "Preview is downscaled for display; the server also downsizes and compresses before parsing." })] }))] }))] }));
 }

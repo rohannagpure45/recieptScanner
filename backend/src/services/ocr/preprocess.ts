@@ -9,7 +9,8 @@ export type Preprocessed = { buffer: Buffer; mime: string };
 // - Re-compress JPEG (quality ~75) / PNG (compressionLevel 9)
 export async function preprocessImage(buffer: Buffer, mime: string): Promise<Preprocessed> {
   try {
-    const src = sharp(buffer, { failOn: 'none' }).rotate();
+    // Use sharp defaults for failure behavior; do not suppress errors.
+    const src = sharp(buffer).rotate();
 
     const heicLike = /heic|heif/i.test(mime);
     const isPng = /png/i.test(mime);
@@ -36,6 +37,8 @@ export async function preprocessImage(buffer: Buffer, mime: string): Promise<Pre
     return { buffer: out, mime: 'image/jpeg' };
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);
+    // Log for observability; propagate a clean error for callers
+    console.error('preprocessImage: sharp processing failed:', msg);
     throw new Error(`Image preprocessing failed: ${msg}`);
   }
 }
