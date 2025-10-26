@@ -1,6 +1,6 @@
 import express from 'express';
 import morgan from 'morgan';
-import receiptRouter from './routes/receipts';
+import receiptRouter from './routes/receipts.ts';
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));

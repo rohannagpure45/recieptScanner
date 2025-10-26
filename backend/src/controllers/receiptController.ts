@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import { runReceiptPipeline } from '../services/pipeline/receiptPipeline';
-import { persistUpload } from '../services/storage/storageService';
+import { runReceiptPipeline } from '../services/pipeline/receiptPipeline.ts';
+import { persistUpload } from '../services/storage/storageService.ts';
 
 export async function createReceiptJob(req: Request, res: Response) {
   if (!req.file) {

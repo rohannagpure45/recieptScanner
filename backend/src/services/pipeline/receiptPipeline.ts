@@ -1,6 +1,6 @@
-import { preprocessImage, runVisionOCR, runTesseractOCR } from '../ocr';
-import { parseReceiptWithClaude } from '../llm/claudeClient';
-import { validateParsedReceipt } from '../../utils/validation';
+import { preprocessImage, runVisionOCR, runTesseractOCR } from '../ocr/index.ts';
+import { parseReceiptWithClaude } from '../llm/claudeClient.ts';
+import { validateParsedReceipt } from '../../utils/validation.ts';
 import type { ParsedReceipt } from '@shared/schemas';
 
 export type TipMode = 'fixed' | 'percent';
