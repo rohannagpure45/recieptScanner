@@ -1,3 +1,3 @@
-export { preprocessImage } from './preprocess.ts';
-export { runVisionOCR } from './googleVision.ts';
-export { runTesseractOCR } from './tesseract.ts';
+export { preprocessImage } from './preprocess';
+export { runVisionOCR } from './googleVision';
+export { runTesseractOCR } from './tesseract';
