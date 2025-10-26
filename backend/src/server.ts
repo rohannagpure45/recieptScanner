@@ -1,7 +1,10 @@
 import express from 'express';
 import morgan from 'morgan';
 import receiptRouter from './routes/receipts';
+import { loadEnv } from './utils/env';
 
+// Load .env for local dev (no-op if not present)
+loadEnv();
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(morgan('dev'));
