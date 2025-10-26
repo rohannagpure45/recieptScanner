@@ -262,3 +262,5 @@ junit.xml
 
 # Generated schema exports
 docs/schemas/*.schema.json
+frontend-dev.prev
+backend-dev.prev

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only --require tsconfig-paths/register src/server.ts",
+    "dev": "node --loader ts-node/esm -r tsconfig-paths/register src/server.ts",
     "build": "tsc -b",
     "start": "node -r tsconfig-paths/register dist/server.js",
     "test": "vitest",
