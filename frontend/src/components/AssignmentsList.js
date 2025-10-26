@@ -3,7 +3,7 @@ import { useWizard } from '../context/WizardContext';
 import { AssignItem } from './AssignItem';
 export function AssignmentsList() {
     const { parsedData } = useWizard();
-    if (!parsedData)
+    if (!parsedData || !Array.isArray(parsedData.lineItems))
         return null;
     return (_jsx("div", { className: "space-y-3", children: parsedData.lineItems.map((item) => (_jsx(AssignItem, { lineItemId: item.id, lineItemName: item.name, lineItemTotalCents: item.totalCents }, item.id))) }));
 }

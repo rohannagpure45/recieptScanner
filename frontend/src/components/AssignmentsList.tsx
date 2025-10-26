@@ -4,7 +4,7 @@ import { AssignItem } from './AssignItem';
 
 export function AssignmentsList() {
   const { parsedData } = useWizard();
-  if (!parsedData) return null;
+  if (!parsedData || !Array.isArray((parsedData as any).lineItems)) return null;
 
   return (
     <div className="space-y-3">
