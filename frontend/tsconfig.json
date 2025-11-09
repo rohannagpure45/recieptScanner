@@ -3,6 +3,7 @@
   "compilerOptions": {
     "types": ["vite/client"],
     "baseUrl": ".",
+    "noEmit": true,
     "paths": {
       "@shared/*": ["../packages/shared/src/*"]
     }
