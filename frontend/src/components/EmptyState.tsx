@@ -11,7 +11,7 @@ interface EmptyStateProps {
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
     <motion.div
-      className="flex flex-col items-center justify-center py-12 px-4 text-center"
+      className="flex flex-col items-center justify-center w-full py-12 px-4 text-center"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}

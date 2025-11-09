@@ -125,12 +125,12 @@ export function GuestsList() {
                   exit={{ opacity: 0, x: -20, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-4 w-full">
                     <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold ${colorClass}`}>
                       {initials}
                     </div>
-                    <div className="flex-1 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-                      <div>
+                    <div className="flex-1 min-w-0 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]">
+                      <div className="w-full min-w-0">
                         <label className="sr-only" htmlFor={`guest-name-${guest.id}`}>
                           Guest name
                         </label>
@@ -144,11 +144,11 @@ export function GuestsList() {
                           aria-required="true"
                         />
                       </div>
-                      <div>
+                      <div className="w-full min-w-0">
                         <label className="sr-only" htmlFor={`guest-email-${guest.id}`}>
                           Guest email (optional)
                         </label>
-                        <div className="relative">
+                        <div className="relative w-full">
                           <input
                             id={`guest-email-${guest.id}`}
                             type="email"
@@ -176,13 +176,13 @@ export function GuestsList() {
                       </div>
                       <motion.button
                         type="button"
-                        className="btn-secondary text-error border-error/50 hover:bg-error/10 touch-target"
+                        className="btn-secondary text-error border-error/50 hover:bg-error/10 touch-target w-full sm:w-auto"
                         onClick={() => removeGuest(guest.id)}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         aria-label={`Remove ${guest.name || 'guest'}`}
                       >
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center justify-center gap-1">
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
