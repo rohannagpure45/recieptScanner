@@ -264,3 +264,8 @@ junit.xml
 docs/schemas/*.schema.json
 frontend-dev.prev
 backend-dev.prev
+
+# Prevent compiled JS files in source directories
+frontend/src/**/*.js
+backend/src/**/*.js
+packages/*/src/**/*.js
