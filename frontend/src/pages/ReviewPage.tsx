@@ -31,7 +31,7 @@ export default function ReviewPage() {
       </header>
 
       <AnimatePresence mode="wait">
-        {!computation ? (
+        {!computation || !Array.isArray(computation.perPerson) || computation.perPerson.length === 0 ? (
           <motion.div
             key="no-computation"
             initial={{ opacity: 0 }}
@@ -61,7 +61,7 @@ export default function ReviewPage() {
             <div>
               <h2 className="mb-4 text-lg font-semibold text-slate-200">Summary by Person</h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {computation.perPerson.map((person: typeof computation.perPerson[number], index: number) => (
+                {(computation.perPerson || []).map((person: typeof computation.perPerson[number], index: number) => (
                   <motion.div
                     key={person.guestId}
                     initial={{ opacity: 0, y: 20 }}
