@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { useWizard } from '../context/WizardContext';
 
 // Generate consistent colors for guests based on their ID
 function getGuestColor(id: string): string {
