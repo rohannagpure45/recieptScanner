@@ -109,7 +109,7 @@ export function GuestsList() {
             initial="initial"
             animate="animate"
           >
-            {guests.map((guest, index) => {
+            {guests.map((guest) => {
               const colorClass = getGuestColor(guest.id);
               const initials = getInitials(guest.name);
               const hasEmailError = emailErrors[guest.id];
