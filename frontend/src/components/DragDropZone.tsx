@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, DragEvent, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWizard } from '../context/WizardContext';
 
-const ACCEPTED = ['image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/heif'];
+const ACCEPTED = ['image/png', 'image/jpeg', 'image/heic', 'image/heif'];
 const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8MB
 const WARN_FILE_BYTES = 4 * 1024 * 1024; // Warn above 4MB
 
@@ -76,6 +76,14 @@ export function DragDropZone() {
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    
+    // Check if the drag moved into a child element
+    const relatedTarget = e.nativeEvent.relatedTarget as Node | null;
+    if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
+      // Still within the container, don't clear dragging state
+      return;
+    }
+    
     setIsDragging(false);
   };
 
@@ -84,6 +92,8 @@ export function DragDropZone() {
     if (file) {
       handleFile(file);
     }
+    // Reset input value so the same file can be re-selected
+    e.currentTarget.value = '';
   };
 
   useEffect(() => {

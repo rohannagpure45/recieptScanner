@@ -1,9 +1,10 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import type { ComputationOutput } from '@shared/schemas';
 import { useWizard } from '../context/WizardContext';
 
 export function DebtsTable({ data }: { data: ComputationOutput }) {
   const { guests } = useWizard();
+  const shouldReduceMotion = useReducedMotion();
   const nameFor = (id: string) => guests.find((g) => g.id === id)?.name || id;
 
   return (
@@ -20,9 +21,9 @@ export function DebtsTable({ data }: { data: ComputationOutput }) {
             <motion.tr
               key={person.guestId}
               className="border-t border-slate-800"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, x: -20 }}
+              animate={shouldReduceMotion ? false : { opacity: 1, x: 0 }}
+              transition={shouldReduceMotion ? { duration: 0 } : { delay: index * 0.05 }}
             >
               <td className="px-4 py-3 font-medium">{nameFor(person.guestId)}</td>
               <td className="px-4 py-3 text-right">
