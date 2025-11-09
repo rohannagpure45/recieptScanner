@@ -1,17 +1,167 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand Colors */
   --color-brand: #7c3aed;
+  --color-brand-light: #8b5cf6;
+  --color-brand-dark: #6d28d9;
+  
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  
+  /* Glass effects */
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(148, 163, 184, 0.1);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-brand: 0 4px 14px 0 rgba(124, 58, 237, 0.39);
+  
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  
+  /* Transitions */
+  --transition-fast: 150ms;
+  --transition-base: 250ms;
+  --transition-slow: 500ms;
 }
 
 @utility btn-primary {
-  @apply rounded-lg bg-brand px-5 py-2 font-semibold text-white transition disabled:cursor-not-allowed;
+  @apply rounded-lg bg-brand px-5 py-2 font-semibold text-white transition-all duration-[--transition-base] disabled:cursor-not-allowed disabled:opacity-50;
+  @apply hover:bg-brand-light hover:shadow-brand focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-slate-950;
+  @apply active:scale-[0.98];
 }
 
 @utility btn-secondary {
-  @apply rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-200;
+  @apply rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-200 transition-all duration-[--transition-fast];
+  @apply hover:border-slate-600 hover:bg-slate-800/50 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-slate-950;
+  @apply active:scale-[0.98];
 }
 
 @utility input {
   @apply rounded-md border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-white placeholder:text-slate-500;
+  @apply transition-all duration-[--transition-fast] focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-brand;
+}
+
+@utility glass-card {
+  @apply rounded-xl border border-slate-800/50 bg-[--glass-bg] backdrop-blur-xl;
+  @apply shadow-md;
+}
+
+@utility card {
+  @apply glass-card p-6;
+}
+
+@utility touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from { 
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 0 8px rgba(124, 58, 237, 0);
+  }
+}
+
+@utility animate-fade-in {
+  animation: fadeIn var(--transition-base) ease-out;
+}
+
+@utility animate-slide-up {
+  animation: slideUp var(--transition-base) ease-out;
+}
+
+@utility animate-slide-down {
+  animation: slideDown var(--transition-base) ease-out;
+}
+
+@utility animate-scale-in {
+  animation: scaleIn var(--transition-base) ease-out;
+}
+
+@utility animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+@utility animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Focus visible for better accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }

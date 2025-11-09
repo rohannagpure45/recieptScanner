@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWizard } from '../context/WizardContext';
 import { exportComputationCSV, exportComputationJSON } from '../lib/export';
 
@@ -6,6 +7,7 @@ export function ExportButtons() {
   const { computation, guests } = useWizard() as any;
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState<string | undefined>();
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const disabled = !computation;
   const names = Object.fromEntries((guests || []).map((g: any) => [g.id, g.name || '']));
 
@@ -33,26 +35,104 @@ export function ExportButtons() {
         const t = await resp.text();
         throw new Error(t || `Email request failed: ${resp.status}`);
       }
-      setMessage('Emails queued (or dry-run in dev)');
+      setMessage('Emails queued successfully');
+      setMessageType('success');
     } catch (e: any) {
       setMessage(e?.message ?? 'Failed to send emails');
+      setMessageType('error');
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <div className="flex flex-wrap gap-3">
-      <button className="btn-secondary" disabled={disabled} onClick={onDownloadCsv}>
-        Download CSV
-      </button>
-      <button className="btn-secondary" disabled={disabled} onClick={onDownloadJson}>
-        Download JSON
-      </button>
-      <button className="btn-primary" disabled={disabled || sending} onClick={onSendEmails}>
-        Send Emails
-      </button>
-      {message && <span className="text-xs text-slate-400">{message}</span>}
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-3">
+        <motion.button
+          className="btn-secondary touch-target"
+          disabled={disabled}
+          onClick={onDownloadCsv}
+          whileHover={disabled ? {} : { scale: 1.05 }}
+          whileTap={disabled ? {} : { scale: 0.95 }}
+          aria-label="Download CSV export"
+        >
+          <span className="flex items-center gap-2">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Download CSV
+          </span>
+        </motion.button>
+        <motion.button
+          className="btn-secondary touch-target"
+          disabled={disabled}
+          onClick={onDownloadJson}
+          whileHover={disabled ? {} : { scale: 1.05 }}
+          whileTap={disabled ? {} : { scale: 0.95 }}
+          aria-label="Download JSON export"
+        >
+          <span className="flex items-center gap-2">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Download JSON
+          </span>
+        </motion.button>
+        <motion.button
+          className="btn-primary touch-target"
+          disabled={disabled || sending}
+          onClick={onSendEmails}
+          whileHover={disabled || sending ? {} : { scale: 1.05 }}
+          whileTap={disabled || sending ? {} : { scale: 0.95 }}
+          aria-label="Send emails to guests"
+        >
+          <span className="flex items-center gap-2">
+            {sending ? (
+              <>
+                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Sending...
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Send Emails
+              </>
+            )}
+          </span>
+        </motion.button>
+      </div>
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            className={`flex items-center gap-2 rounded-lg border p-3 ${
+              messageType === 'success'
+                ? 'border-success/50 bg-success/10 text-success'
+                : 'border-error/50 bg-error/10 text-error'
+            }`}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            role="alert"
+            aria-live="polite"
+          >
+            {messageType === 'success' ? (
+              <svg className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+            <p className="text-sm">{message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

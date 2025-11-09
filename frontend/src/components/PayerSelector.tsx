@@ -5,11 +5,12 @@ export function PayerSelector() {
 
   return (
     <label className="block text-sm text-slate-200">
-      Payer
+      <span className="mb-2 block font-medium">Who paid for this receipt?</span>
       <select
-        className="mt-2 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2"
+        className="input w-full touch-target"
         value={payerId ?? ''}
         onChange={(event) => setPayerId(event.target.value || undefined)}
+        required
       >
         <option value="">Select who paid</option>
         {guests.map((guest) => (
@@ -18,6 +19,9 @@ export function PayerSelector() {
           </option>
         ))}
       </select>
+      <p className="mt-2 text-xs text-slate-400">
+        This person will receive payments from others based on the split calculation.
+      </p>
     </label>
   );
 }

@@ -1,4 +1,6 @@
 import { useWizard } from '../context/WizardContext';
+import { GuestChip } from './GuestChip';
+import { motion } from 'framer-motion';
 
 type AssignItemProps = {
   lineItemId: string;
@@ -29,38 +31,47 @@ export function AssignItem({ lineItemId, lineItemName, lineItemTotalCents }: Ass
       })()
     : [];
 
-  const splitSummary = splitSharesCents
-    .map((amount) => (amount / 100).toFixed(2))
-    .join(', ');
   const allEqual =
     splitSharesCents.length > 0 && splitSharesCents.every((v) => v === splitSharesCents[0]);
 
   return (
-    <div className="rounded-lg border border-slate-800 p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm font-medium text-slate-200">{lineItemName}</p>
-        <p className="text-xs text-slate-400">{(lineItemTotalCents / 100).toFixed(2)} total</p>
+    <motion.div
+      className={`glass-card p-4 transition-all duration-200 ${
+        selectedIds.length === 0 ? 'border-warning/50 bg-warning/5' : ''
+      }`}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01 }}
+    >
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <p className="text-base font-semibold text-slate-200">{lineItemName}</p>
+        <p className="text-lg font-bold text-slate-100">${(lineItemTotalCents / 100).toFixed(2)}</p>
       </div>
-      <div className="flex flex-wrap gap-3">
+      <div className="mb-3 flex flex-wrap gap-2">
         {guests.map((g) => (
-          <label key={g.id} className="inline-flex items-center gap-2 text-sm text-slate-200">
-            <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-slate-700 bg-slate-900"
-              checked={selected.has(g.id)}
-              onChange={() => toggle(g.id)}
-            />
-            {g.name || 'Unnamed'}
-          </label>
+          <GuestChip
+            key={g.id}
+            guestId={g.id}
+            name={g.name}
+            isSelected={selected.has(g.id)}
+            onToggle={() => toggle(g.id)}
+          />
         ))}
       </div>
-      <p className="mt-2 text-xs text-slate-500">
-        {selectedIds.length > 0
-          ? allEqual
-            ? `Split equally among ${selectedIds.length} — ${splitSummary} each`
-            : `Split among ${selectedIds.length} — ${splitSummary} (unequal)`
-          : 'Select one or more people'}
-      </p>
-    </div>
+      {selectedIds.length > 0 && (
+        <motion.p
+          className="text-xs text-slate-400"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          {allEqual
+            ? `Split equally among ${selectedIds.length} — $${(splitSharesCents[0] / 100).toFixed(2)} each`
+            : `Split among ${selectedIds.length} — ${splitSharesCents.map((c) => `$${(c / 100).toFixed(2)}`).join(', ')}`}
+        </motion.p>
+      )}
+      {selectedIds.length === 0 && (
+        <p className="text-xs text-warning">Select one or more people to assign this item</p>
+      )}
+    </motion.div>
   );
 }
