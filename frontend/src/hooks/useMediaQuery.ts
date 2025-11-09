@@ -10,6 +10,9 @@ export function useMediaQuery(query: string): boolean {
     if (typeof window === 'undefined') return;
 
     const mediaQuery = window.matchMedia(query);
+    // Synchronize state immediately with current query match
+    setMatches(mediaQuery.matches);
+    
     const handler = (event: MediaQueryListEvent) => setMatches(event.matches);
 
     // Modern browsers
